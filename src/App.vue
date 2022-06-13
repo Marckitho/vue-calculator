@@ -15,7 +15,10 @@ export default {
       firstTerm: "",
       operator: "",
       secondTerm: "",
-      displayText: ""
+      displayText: "",
+
+      volume: 5,
+      toggleVolume: true
     }
   },
 
@@ -24,7 +27,6 @@ export default {
       this.firstTerm = ""
       this.operator = ""
       this.secondTerm = ""
-      this.displayText = ""
     },
     
     numberClick(number) {
@@ -58,12 +60,12 @@ export default {
           if (this.operator == "") this.firstTerm += number
           else this.secondTerm += number
       }
-
-      this.updateDisplay()
     },
 
     updateDisplay() {
-      this.displayText = `${this.firstTerm} ${this.operator} ${this.secondTerm}`
+      this.displayText = this.firstTerm;
+      if (this.operator) this.displayText += ` ${this.operator}`
+      if (this.secondTerm) this.displayText += ` ${this.secondTerm}`
     },
 
     operatorClick(operator) {
@@ -79,8 +81,6 @@ export default {
         }
         
       }
-
-      this.updateDisplay()
     },
 
     calculate() {
@@ -107,6 +107,19 @@ export default {
       this.firstTerm = result
       this.operator = ""
       this.secondTerm = ""
+    }
+  },
+
+  watch: {
+    firstTerm() {
+      this.updateDisplay()
+    },
+
+    secondTerm() {
+      this.updateDisplay()
+    },
+
+    operator() {
       this.updateDisplay()
     }
   }
@@ -114,6 +127,18 @@ export default {
 </script>
 
 <template>
+  <div class="volume">
+    <div class="volume-icon" @click="toggleVolume = !toggleVolume">
+      <ion-icon v-if="!toggleVolume" name="volume-mute" size="large"></ion-icon>
+      <ion-icon v-else-if="volume > 7" name="volume-high" size="large"></ion-icon>
+      <ion-icon v-else-if="volume > 4" name="volume-medium" size="large"></ion-icon>
+      <ion-icon v-else-if="volume > 1" name="volume-low" size="large"></ion-icon>
+      <ion-icon v-else name="volume-off" size="large"></ion-icon>
+    </div>
+    <div class="volume-slider">
+      <input type="range" min="0" max="10" v-model="volume" @change="toggleVolume = true">
+    </div>
+  </div>
   <div class="calculator">
     <input disabled type="text" class="display" placeholder="0" v-model="displayText">
     <div class="buttons">
@@ -170,6 +195,94 @@ src: url("././assets/fonts/calculator-webfont.woff") format("woff"),
   align-items: center;
 }
 
+/* Controlador de Volume */
+.volume {
+  position: fixed;
+  top: 0;
+  right: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  gap: 10px;
+
+  margin-top: 20px;
+  margin-right: 20px;
+}
+
+.volume-icon {
+  width: min-content;
+  padding-block: 8px;
+
+  color: var(--operator-dark);
+
+  cursor: pointer;
+  z-index: 2;
+}
+
+.volume-slider, .volume-icon {
+  background: var(--main);
+
+  padding-inline: 12px;
+  border-radius: 5px;
+
+  box-shadow: 0px 5px 0px var(--main-dark);
+}
+
+.volume-slider input[type=range] {
+  height: 25px;
+  -webkit-appearance: none;
+  margin: 10px 0;
+  width: 100%;
+  background: none;
+}
+
+.volume-slider input[type=range]:focus {
+  outline: none;
+}
+
+.volume-slider input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 5px;
+  cursor: pointer;
+  box-shadow: 0px 0px 0px #000000;
+  background: var(--operator);
+  border-radius: 3px;
+  border: 0px solid #000000;
+}
+
+.volume-slider input[type=range]::-webkit-slider-thumb {
+  box-shadow: 0px 0px 0px #000000;
+  outline: 2px solid var(--main);
+  height: 16px;
+  width: 16px;
+  border-radius: 25px;
+  background: var(--operator-dark);
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -6px;
+}
+
+.volume-slider input[type=range]:focus::-webkit-slider-runnable-track {
+  background: var(--operator-dark);
+}
+
+.volume-slider {
+  transition: all .2s;
+  transition-delay: .4s;
+
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+.volume:hover .volume-slider {
+  opacity: 1;
+  transform: translateY(0px);
+}
+
+/* Calculadora */
+
 .calculator {
   border-radius: 20px;
 
@@ -204,6 +317,8 @@ src: url("././assets/fonts/calculator-webfont.woff") format("woff"),
   width: 100%;
 
   padding: 5px 10px;
+
+  text-overflow: ellipsis;
 }
 
 .buttons {
