@@ -1,5 +1,6 @@
 <script>
 import { toNumber } from '@vue/shared'
+import { Howl, Howler } from 'howler';
 
 export default {
   data() {
@@ -18,7 +19,11 @@ export default {
       displayText: "",
 
       volume: 5,
-      toggleVolume: true
+      toggleVolume: true,
+
+      sound: new Howl({
+        src: ['../public/click.mp3']
+      })
     }
   },
 
@@ -60,6 +65,7 @@ export default {
           if (this.operator == "") this.firstTerm += number
           else this.secondTerm += number
       }
+      this.playClick();
     },
 
     updateDisplay() {
@@ -81,6 +87,8 @@ export default {
         }
         
       }
+
+      this.playClick()
     },
 
     calculate() {
@@ -107,7 +115,18 @@ export default {
       this.firstTerm = result
       this.operator = ""
       this.secondTerm = ""
+    },
+
+    playClick() {
+      if (this.toggleVolume) this.sound.play()
     }
+  },
+
+  // Defines Howler volume to the default the next tick the document is mounted
+  mounted: function () { 
+    this.$nextTick(() => {
+      Howler.volume(this.volume / 10)
+    })
   },
 
   watch: {
@@ -121,6 +140,10 @@ export default {
 
     operator() {
       this.updateDisplay()
+    },
+
+    volume() {
+      Howler.volume(this.volume / 10)
     }
   }
 }
@@ -132,7 +155,7 @@ export default {
       <ion-icon v-if="!toggleVolume" name="volume-mute" size="large"></ion-icon>
       <ion-icon v-else-if="volume > 7" name="volume-high" size="large"></ion-icon>
       <ion-icon v-else-if="volume > 4" name="volume-medium" size="large"></ion-icon>
-      <ion-icon v-else-if="volume > 1" name="volume-low" size="large"></ion-icon>
+      <ion-icon v-else-if="volume > 0" name="volume-low" size="large"></ion-icon>
       <ion-icon v-else name="volume-off" size="large"></ion-icon>
     </div>
     <div class="volume-slider">
